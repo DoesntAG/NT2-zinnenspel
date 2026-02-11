@@ -38,19 +38,13 @@ button { padding:10px 20px; font-size:18px; margin:10px; }
 <div id="feedback"></div>
 
 <script>
-
 // Globale variabelen
-let sentences = [
-    "ik drink een kop koffie",
-    "wij gaan morgen naar school",
-    "zij koopt een rode jas"
-];
-
+let sentences = []; // leeg, wordt via fetch geladen
 let currentSentence = "";
 let score = 0;
 let colors = ["#FF6B6B","#4ECDC4","#FFD93D","#6A4C93","#FF7F50","#2A9D8F"];
 
-// Globale functies
+// Shuffle functie
 function shuffle(array) {
     for(let i=array.length-1;i>0;i--){
         let j=Math.floor(Math.random()*(i+1));
@@ -59,11 +53,18 @@ function shuffle(array) {
     return array;
 }
 
+// Laad nieuwe zin
 function loadSentence() {
     document.getElementById("feedback").innerText = "";
     document.getElementById("dropzone").innerHTML = "";
     document.getElementById("words").innerHTML = "";
 
+    if(sentences.length === 0){
+        document.getElementById("feedback").innerText = "Geen zinnen gevonden!";
+        return;
+    }
+
+    // Kies een nieuwe zin, voorkom direct herhalen
     let newSentence;
     do {
         newSentence = sentences[Math.floor(Math.random()*sentences.length)];
@@ -85,6 +86,7 @@ function loadSentence() {
     });
 }
 
+// Verplaats woord bij klik
 function moveWord(wordElement) {
     let dropzone = document.getElementById("dropzone");
     let wordsContainer = document.getElementById("words");
@@ -96,10 +98,12 @@ function moveWord(wordElement) {
     }
 }
 
+// Normaliseer tekst voor vergelijking
 function normalize(text){
     return text.toLowerCase().replace(/\s+/g," ").trim();
 }
 
+// Controleer of zin correct is
 function checkSentence(){
     let dropzone = document.getElementById("dropzone");
     let words = dropzone.querySelectorAll(".word");
@@ -122,12 +126,23 @@ function checkSentence(){
     }
 }
 
+// Volgende zin laden
 function nextSentence(){ loadSentence(); }
 
-// Initialisatie
-window.onload = function() {
-    loadSentence();
-};
+// ==============================
+// Fetch zinnen uit extern bestand
+// ==============================
+fetch('zinnen.txt')
+  .then(response => response.text())
+  .then(data => {
+      // splits op nieuwe regels, verwijder lege regels
+      sentences = data.split('\n').filter(line => line.trim() !== '');
+      loadSentence(); // start de eerste zin
+  })
+  .catch(error => {
+      console.error("Fout bij inladen van zinnen:", error);
+      alert("De zinnen konden niet geladen worden!");
+  });
 
 </script>
 
