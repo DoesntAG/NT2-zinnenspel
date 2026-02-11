@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>NT2 Zinnen Spel</title>
+<style>
+body { font-family: Arial, sans-serif; text-align:center; background:#f4f6f8; }
+h1 { margin-top: 30px; }
+.word-container, .drop-container {
+    margin: 20px auto;
+    padding:20px;
+    min-height:70px;
+    border:2px dashed #ccc;
+    background:white;
+    width:80%;
+}
+.word {
+    display:inline-block;
+    padding:10px 15px;
+    margin:5px;
+    color:white;
+    cursor:pointer;
+    font-size:20px;
+    border-radius:8px;
+}
+button { padding:10px 20px; font-size:18px; margin:10px; }
+#feedback { font-size:22px; font-weight:bold; margin-top:20px; }
+</style>
+</head>
+<body>
+
+<h1>Zet de zin in de juiste volgorde</h1>
+<div id="score">Score: 0</div>
+<div class="word-container" id="words"></div>
+<div class="drop-container" id="dropzone"></div>
+<button onclick="checkSentence()">Controleer</button>
+<button onclick="nextSentence()">Volgende zin</button>
+<div id="feedback"></div>
+
+<script>
+
+// Globale variabelen
+let sentences = [
+    "ik drink een kop koffie",
+    "wij gaan morgen naar school",
+    "zij koopt een rode jas"
+];
+
+let currentSentence = "";
+let score = 0;
+let colors = ["#FF6B6B","#4ECDC4","#FFD93D","#6A4C93","#FF7F50","#2A9D8F"];
+
+// Globale functies
+function shuffle(array) {
+    for(let i=array.length-1;i>0;i--){
+        let j=Math.floor(Math.random()*(i+1));
+        [array[i],array[j]]=[array[j],array[i]];
+    }
+    return array;
+}
+
+function loadSentence() {
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("dropzone").innerHTML = "";
+    document.getElementById("words").innerHTML = "";
+
+    let newSentence;
+    do {
+        newSentence = sentences[Math.floor(Math.random()*sentences.length)];
+    } while(newSentence===currentSentence && sentences.length>1);
+
+    currentSentence = newSentence;
+
+    let words = shuffle(currentSentence.split(" "));
+    let container = document.getElementById("words");
+
+    words.forEach((word,index)=>{
+        let span = document.createElement("span");
+        span.innerText = word;
+        span.className = "word";
+        span.style.backgroundColor = colors[index % colors.length];
+
+        span.onclick = function(){ moveWord(span); };
+        container.appendChild(span);
+    });
+}
+
+function moveWord(wordElement) {
+    let dropzone = document.getElementById("dropzone");
+    let wordsContainer = document.getElementById("words");
+
+    if(wordElement.parentElement.id==="words"){
+        dropzone.appendChild(wordElement);
+    } else {
+        wordsContainer.appendChild(wordElement);
+    }
+}
+
+function normalize(text){
+    return text.toLowerCase().replace(/\s+/g," ").trim();
+}
+
+function checkSentence(){
+    let dropzone = document.getElementById("dropzone");
+    let words = dropzone.querySelectorAll(".word");
+    let userSentence = "";
+    words.forEach((word,index)=>{
+        userSentence += word.innerText;
+        if(index<words.length-1) userSentence += " ";
+    });
+
+    let feedback = document.getElementById("feedback");
+
+    if(normalize(userSentence)===normalize(currentSentence)){
+        feedback.innerText="Goed gedaan!";
+        feedback.style.color="green";
+        score++;
+        document.getElementById("score").innerText="Score: "+score;
+    } else {
+        feedback.innerText="Nog niet goed. Probeer opnieuw.";
+        feedback.style.color="red";
+    }
+}
+
+function nextSentence(){ loadSentence(); }
+
+// Initialisatie
+window.onload = function() {
+    loadSentence();
+};
+
+</script>
+
+</body>
+</html>
