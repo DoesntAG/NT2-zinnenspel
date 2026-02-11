@@ -72,7 +72,13 @@ function loadSentence() {
 
     currentSentence = newSentence;
 
-    let words = shuffle(currentSentence.split(" "));
+    // 🔹 Split en filter lege woorden
+    let words = shuffle(
+        currentSentence
+            .split(" ")
+            .filter(w => w.trim() !== "") // verwijdert lege blokjes
+    );
+
     let container = document.getElementById("words");
 
     words.forEach((word,index)=>{
